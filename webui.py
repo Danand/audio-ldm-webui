@@ -26,7 +26,13 @@ with st.container(border=True):
 
     device_chosen = st.radio(
         label="Device",
-        options=[ "cpu", "cuda" ],
+        options=[
+            "cpu",
+            "cuda",
+            "mps",
+        ],
+        horizontal=True,
+        help="Please check either device type is supported on your machine.",
     )
 
     positive_prompt = st.text_area(
