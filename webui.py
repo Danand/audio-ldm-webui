@@ -13,6 +13,20 @@ from typing import cast
 
 MODEL_REPO_DEFAULT="cvssp/audioldm2"
 
+@st.cache_resource
+def load_pipeline(
+    model_repo: str,
+    device: str | None,
+) -> AudioLDM2Pipeline:
+    pipe: AudioLDM2Pipeline = AudioLDM2Pipeline.from_pretrained(
+        pretrained_model_name_or_path=model_repo,
+        torch_dtype=torch.float32,
+    ) # type: ignore
+
+    pipe: AudioLDM2Pipeline = pipe.to(device)
+
+    return pipe
+
 st.title("AudioLDM 2: Web UI")
 
 with st.container(border=True):
@@ -93,12 +107,7 @@ if button_generate.button(
 
     progress_steps.text("Initializing pipeline...")
 
-    pipe: AudioLDM2Pipeline = AudioLDM2Pipeline.from_pretrained(
-        pretrained_model_name_or_path=model_repo,
-        torch_dtype=torch.float32,
-    ) # type: ignore
-
-    pipe: AudioLDM2Pipeline = pipe.to(device_chosen)
+    pipe: AudioLDM2Pipeline = load_pipeline(model_repo, device_chosen)
 
     generator = torch.Generator(device_chosen).manual_seed(int(seed))
 
