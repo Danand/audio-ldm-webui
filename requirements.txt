@@ -1,0 +1,6 @@
+diffusers==0.25.1
+torch==2.1.2
+transformers==4.36.2
+accelerate==0.26.1
+streamlit==1.30.0
+
