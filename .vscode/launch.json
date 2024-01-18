@@ -13,7 +13,10 @@
       "args": [
         "run",
         "webui.py"
-      ]
+      ],
+      "env": {
+        "PYTORCH_ENABLE_MPS_FALLBACK": "1"
+      }
     }
   ]
 }
