@@ -12,9 +12,10 @@ import time
 import hashlib
 import json
 
-from typing import cast
+from typing import List, cast
 from os.path import join, realpath
 from os import makedirs
+from platform import system
 from dataclasses import dataclass
 
 SAMPLE_RATE_DEFAULT = 16000
@@ -29,6 +30,23 @@ class OutputAudioInfo:
     guidance_scale: float
     duration: float
     index: int
+
+def get_available_devices() -> List[str]:
+    devices = [
+        "cpu",
+        "cuda",
+        "mps",
+    ]
+
+    if torch.cuda.is_available():
+        devices.remove("cuda")
+        devices.insert(0, "cuda")
+
+    if torch.backends.mps.is_available() and system() == "Darwin":
+        devices.remove("mps")
+        devices.insert(0, "mps")
+
+    return devices
 
 @st.cache_resource
 def load_pipeline(
@@ -86,13 +104,23 @@ with st.container(border=True):
         ],
     )
 
+    devices = [
+        "cpu",
+        "cuda",
+        "mps",
+    ]
+
+    if torch.cuda.is_available():
+        devices.remove("cuda")
+        devices.insert(0, "cuda")
+
+    if torch.backends.mps.is_available() and system() == "Darwin":
+        devices.remove("mps")
+        devices.insert(0, "mps")
+
     device_chosen = st.radio(
         label="Device",
-        options=[
-            "cpu",
-            "cuda",
-            "mps",
-        ],
+        options=devices,
         horizontal=True,
         help="Please check either device type is supported on your machine.",
     )
