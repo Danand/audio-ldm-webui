@@ -84,6 +84,12 @@ with st.container(border=True):
         min_value=1,
     )
 
+    guidance_scale = st.number_input(
+        label="Guidance Scale",
+        value=3.5,
+        min_value=0.0,
+    )
+
     seed = st.number_input(
         label="Seed",
         format="%i",
@@ -137,6 +143,7 @@ if button_generate.button(
         positive_prompt,
         negative_prompt=negative_prompt,
         num_inference_steps=cast(int, steps),
+        guidance_scale=cast(float, guidance_scale),
         audio_length_in_s=cast(float, duration),
         num_waveforms_per_prompt=cast(int, amount),
         generator=generator,
