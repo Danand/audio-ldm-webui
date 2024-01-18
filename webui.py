@@ -15,8 +15,6 @@ from typing import cast
 from os.path import join, realpath
 from os import makedirs
 
-MODEL_REPO_DEFAULT="cvssp/audioldm2"
-
 @st.cache_resource
 def load_pipeline(
     model_repo: str,
@@ -51,10 +49,13 @@ st.title("AudioLDM 2: Web UI")
 with st.container(border=True):
     st.subheader("Settings")
 
-    model_repo = st.text_input(
-        label="Repo",
-        value=MODEL_REPO_DEFAULT,
-        placeholder=MODEL_REPO_DEFAULT,
+    model_repo = st.selectbox(
+        label="Model",
+        options=[
+            "cvssp/audioldm2",
+            "cvssp/audioldm2-large",
+            "cvssp/audioldm2-music",
+        ],
     )
 
     device_chosen = st.radio(
@@ -126,7 +127,7 @@ if button_generate.button(
 
     progress_steps.text("Initializing pipeline...")
 
-    pipe: AudioLDM2Pipeline = load_pipeline(model_repo, device_chosen)
+    pipe: AudioLDM2Pipeline = load_pipeline(cast(str, model_repo), device_chosen)
 
     generator = torch.Generator(device_chosen).manual_seed(int(seed))
 
