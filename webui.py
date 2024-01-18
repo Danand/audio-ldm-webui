@@ -15,6 +15,8 @@ from typing import cast
 from os.path import join, realpath
 from os import makedirs
 
+SAMPLE_RATE_DEFAULT = 16000
+
 @st.cache_resource
 def load_pipeline(
     model_repo: str,
@@ -159,8 +161,6 @@ if button_generate.button(
 
     audios: ndarray = pipe_output.audios
 
-    sample_rate = audios.shape[1]
-
     with container_output.container(border=True):
         st.subheader("Generated Audio")
 
@@ -170,7 +170,7 @@ if button_generate.button(
             with st.container(border=True):
                 st.audio(
                     data=audio,
-                    sample_rate=sample_rate,
+                    sample_rate=SAMPLE_RATE_DEFAULT,
                 )
 
                 output_dir = "outputs"
@@ -194,7 +194,7 @@ if button_generate.button(
 
                 scipy.io.wavfile.write(
                     filename=output_path,
-                    rate=sample_rate,
+                    rate=SAMPLE_RATE_DEFAULT,
                     data=audio,
                 )
 
