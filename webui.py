@@ -10,12 +10,25 @@ import streamlit as st
 
 import time
 import hashlib
+import json
 
 from typing import cast
 from os.path import join, realpath
 from os import makedirs
+from dataclasses import dataclass
 
 SAMPLE_RATE_DEFAULT = 16000
+
+@dataclass(frozen=True)
+class OutputAudioInfo:
+    model: str
+    positive_prompt: str
+    negative_prompt: str
+    seed: int
+    steps: int
+    guidance_scale: float
+    duration: float
+    index: int
 
 @st.cache_resource
 def load_pipeline(
@@ -31,20 +44,27 @@ def load_pipeline(
 
     return pipe
 
-def get_hash(
-    positive_prompt: str,
-    negative_prompt: str,
-    steps: int,
-    duration: float,
-    amount: int
-):
-    hash_source = f"Positive prompt: {positive_prompt}\n"
-    hash_source += f"Negative prompt: {negative_prompt}\n"
-    hash_source += f"Steps: {steps}\n"
-    hash_source += f"Duration: {duration}\n"
-    hash_source += f"Amount: {amount}"
+def format_output_audio_file_name(info: OutputAudioInfo) -> str:
+    keyword = info.positive_prompt.split(",")[0]
 
-    return hashlib.sha1(hash_source.encode()).hexdigest()
+    keyword_clean = keyword.replace(" ", "-")
+    keyword_clean = keyword_clean.replace("_", "-")
+    keyword_clean = keyword_clean.lower()
+
+    file_name = keyword_clean
+    file_name += f"_{info.steps}"
+    file_name += f"-{info.guidance_scale:.2f}"
+    file_name += f"-{info.duration:.2f}"
+    file_name += f"-{info.index}"
+
+    info_json = json.dumps(info.__dict__)
+    info_hash = hashlib.sha1(info_json.encode()).hexdigest()[:8]
+
+    file_name += f"-{info_hash}"
+
+    file_name += ".wav"
+
+    return file_name
 
 st.title("AudioLDM 2: Web UI")
 
@@ -168,27 +188,27 @@ if button_generate.button(
 
         for audio in audios:
             with st.container(border=True):
-                st.audio(
-                    data=audio,
-                    sample_rate=SAMPLE_RATE_DEFAULT,
+                output_audio_info = OutputAudioInfo(
+                    model=cast(str, model_repo),
+                    positive_prompt=positive_prompt,
+                    negative_prompt=negative_prompt,
+                    seed=cast(int, seed),
+                    steps=cast(int, steps),
+                    guidance_scale=cast(float, guidance_scale),
+                    duration=cast(float, duration),
+                    index=index,
                 )
 
                 output_dir = "outputs"
 
                 makedirs(name=output_dir, exist_ok=True)
 
-                output_hash = get_hash(
-                    positive_prompt=positive_prompt,
-                    negative_prompt=negative_prompt,
-                    steps=cast(int, steps),
-                    duration=cast(float, duration),
-                    amount=cast(int, amount),
-                )
+                file_name = format_output_audio_file_name(output_audio_info)
 
                 output_path = realpath(
                     join(
                         output_dir,
-                        f"{output_hash}-{index}.wav",
+                        file_name,
                     ),
                 )
 
@@ -202,6 +222,8 @@ if button_generate.button(
                     body=output_path,
                     language="bash",
                 )
+
+                st.audio(output_path)
 
             index += 1
 
