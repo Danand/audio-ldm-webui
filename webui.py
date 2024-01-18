@@ -4,10 +4,9 @@ import scipy
 from diffusers.pipelines.audioldm2.pipeline_audioldm2 import AudioLDM2Pipeline
 from diffusers.pipelines.pipeline_utils import AudioPipelineOutput
 
-from numpy import ndarray
-
 import librosa
 
+import numpy as np
 import streamlit as st
 
 import time
@@ -33,6 +32,7 @@ class OutputAudioInfo:
     duration: float
     index: int
     tempo: float
+    note: str
 
 def get_available_devices() -> List[str]:
     devices = [
@@ -73,8 +73,14 @@ def format_output_audio_file_name(info: OutputAudioInfo) -> str:
     keyword_clean = keyword_clean.lower()
 
     file_name = keyword_clean
-    file_name += f"_{info.steps}"
+
+    note = info.note
+    note_clean = note.replace("#", "sharp")
+
+    file_name += f"_{note_clean}"
+
     file_name += f"-{round(info.tempo)}bpm"
+    file_name += f"-{info.steps}"
     file_name += f"-{info.guidance_scale:.2f}"
     file_name += f"-{info.duration:.2f}"
     file_name += f"-{info.index}"
@@ -217,7 +223,7 @@ if button_generate.button(
     text_time_elapsed.text("Completed.")
     text_time_elapsed.text(f"Time elapsed: {time_elapsed:.2f} s.")
 
-    audios: ndarray = pipe_output.audios
+    audios: np.ndarray = pipe_output.audios
 
     with container_output.container(border=True):
         st.subheader("Generated Audio")
@@ -237,6 +243,15 @@ if button_generate.button(
                     sr=SAMPLE_RATE_DEFAULT,
                 )
 
+                spectral_rolloff = librosa.feature.spectral_rolloff(
+                    y=audio,
+                    sr=SAMPLE_RATE_DEFAULT,
+                )
+
+                frequency_median = np.median(spectral_rolloff)
+                note_median = librosa.hz_to_note(frequency_median)
+                note_median = note_median.replace("\u266f", "#")
+
                 output_audio_info = OutputAudioInfo(
                     model=cast(str, model_repo),
                     positive_prompt=positive_prompt,
@@ -247,6 +262,7 @@ if button_generate.button(
                     duration=cast(float, duration),
                     index=index,
                     tempo=tempo,
+                    note=note_median,
                 )
 
                 output_dir = "outputs"
