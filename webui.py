@@ -1,4 +1,5 @@
 import torch
+import scipy
 
 from diffusers.pipelines.audioldm2.pipeline_audioldm2 import AudioLDM2Pipeline
 from diffusers.pipelines.pipeline_utils import AudioPipelineOutput
@@ -8,8 +9,11 @@ from numpy import ndarray
 import streamlit as st
 
 import time
+import hashlib
 
 from typing import cast
+from os.path import join, realpath
+from os import makedirs
 
 MODEL_REPO_DEFAULT="cvssp/audioldm2"
 
@@ -26,6 +30,21 @@ def load_pipeline(
     pipe: AudioLDM2Pipeline = pipe.to(device)
 
     return pipe
+
+def get_hash(
+    positive_prompt: str,
+    negative_prompt: str,
+    steps: int,
+    duration: float,
+    amount: int
+):
+    hash_source = f"Positive prompt: {positive_prompt}\n"
+    hash_source += f"Negative prompt: {negative_prompt}\n"
+    hash_source += f"Steps: {steps}\n"
+    hash_source += f"Duration: {duration}\n"
+    hash_source += f"Amount: {amount}"
+
+    return hashlib.sha1(hash_source.encode()).hexdigest()
 
 st.title("AudioLDM 2: Web UI")
 
@@ -137,9 +156,44 @@ if button_generate.button(
     with container_output.container(border=True):
         st.subheader("Generated Audio")
 
+        index = 0
+
         for audio in audios:
-            st.audio(
-                data=audio,
-                sample_rate=sample_rate,
-            )
+            with st.container(border=True):
+                st.audio(
+                    data=audio,
+                    sample_rate=sample_rate,
+                )
+
+                output_dir = "outputs"
+
+                makedirs(name=output_dir, exist_ok=True)
+
+                output_hash = get_hash(
+                    positive_prompt=positive_prompt,
+                    negative_prompt=negative_prompt,
+                    steps=cast(int, steps),
+                    duration=cast(float, duration),
+                    amount=cast(int, amount),
+                )
+
+                output_path = realpath(
+                    join(
+                        output_dir,
+                        f"{output_hash}-{index}.wav",
+                    ),
+                )
+
+                scipy.io.wavfile.write(
+                    filename=output_path,
+                    rate=sample_rate,
+                    data=audio,
+                )
+
+                st.code(
+                    body=output_path,
+                    language="bash",
+                )
+
+            index += 1
 
