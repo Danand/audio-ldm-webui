@@ -6,6 +6,7 @@
     "danand",
     "dataframe",
     "dtype",
+    "librosa",
     "ndarray",
     "pretraining",
     "selectbox",

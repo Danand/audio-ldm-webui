@@ -6,6 +6,8 @@ from diffusers.pipelines.pipeline_utils import AudioPipelineOutput
 
 from numpy import ndarray
 
+import librosa
+
 import streamlit as st
 
 import time
@@ -30,6 +32,7 @@ class OutputAudioInfo:
     guidance_scale: float
     duration: float
     index: int
+    tempo: float
 
 def get_available_devices() -> List[str]:
     devices = [
@@ -71,6 +74,7 @@ def format_output_audio_file_name(info: OutputAudioInfo) -> str:
 
     file_name = keyword_clean
     file_name += f"_{info.steps}"
+    file_name += f"-{round(info.tempo)}bpm"
     file_name += f"-{info.guidance_scale:.2f}"
     file_name += f"-{info.duration:.2f}"
     file_name += f"-{info.index}"
@@ -222,6 +226,17 @@ if button_generate.button(
 
         for audio in audios:
             with st.container(border=True):
+                onset_envelope = librosa.onset.onset_strength(
+                    y=audio,
+                    sr=SAMPLE_RATE_DEFAULT,
+                    hop_length=512,
+                    )
+
+                tempo, _ = librosa.beat.beat_track(
+                    onset_envelope=onset_envelope,
+                    sr=SAMPLE_RATE_DEFAULT,
+                )
+
                 output_audio_info = OutputAudioInfo(
                     model=cast(str, model_repo),
                     positive_prompt=positive_prompt,
@@ -231,6 +246,7 @@ if button_generate.button(
                     guidance_scale=cast(float, guidance_scale),
                     duration=cast(float, duration),
                     index=index,
+                    tempo=tempo,
                 )
 
                 output_dir = "outputs"
