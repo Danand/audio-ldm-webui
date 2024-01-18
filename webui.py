@@ -66,7 +66,13 @@ def format_output_audio_file_name(info: OutputAudioInfo) -> str:
 
     return file_name
 
-st.title("AudioLDM 2: Web UI")
+title = "AudioLDM 2: Web UI"
+
+st.set_page_config(
+    page_title=title,
+)
+
+st.title(title)
 
 with st.container(border=True):
     st.subheader("Settings")
