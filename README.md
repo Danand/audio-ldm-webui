@@ -9,23 +9,7 @@ git clone git@github.com:Danand/audio-ldm-webui.git
 cd audio-ldm-webui
 python3 -m venv .venv
 source .venv/bin/activate
-```
-
-### Installing dependencies
-
-#### Regular dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-#### Alternative: MPS backend dependencies (MacOS-only acceleration)
-
-```bash
-pip install \
-  --pre \
-  --extra-index-url "https://download.pytorch.org/whl/nightly/cpu" \
-  -r requirements-mps.txt
+pip install --pre -r requirements.txt
 ```
 
 ## How to launch

@@ -1,6 +1,6 @@
-scipy==1.11.4
 diffusers==0.25.1
-torch==2.1.2
+torch==2.3.* ; sys_platform=="darwin"
+torch==2.1.2 ; sys_platform!="darwin"
 transformers==4.36.2
 librosa==0.10.1
 accelerate==0.26.1
