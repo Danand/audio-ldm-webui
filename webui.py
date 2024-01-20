@@ -14,12 +14,14 @@ import hashlib
 import json
 
 from typing import List, cast
-from os.path import join, realpath
+from os.path import join, realpath, exists
 from os import makedirs
 from platform import system
 from dataclasses import dataclass
 
 SAMPLE_RATE_DEFAULT = 16000
+TEMP_DIR = "temp"
+SESSION_STATE_PATH = f"{TEMP_DIR}/session-state.json"
 
 @dataclass(frozen=True)
 class OutputAudioInfo:
@@ -108,6 +110,18 @@ with st.container(border=True):
         divider="orange",
     )
 
+    if not st.session_state.get("is_loaded_session_state", False):
+        if exists(SESSION_STATE_PATH):
+            with open(SESSION_STATE_PATH, "r") as file:
+                session_state_loaded = json.loads(file.read())
+
+                for key, value in dict(session_state_loaded).items():
+                    st.session_state[key] = value
+
+        st.session_state["is_loaded_session_state"] = True
+
+        st.session_state.clear()
+
     model_repo = st.selectbox(
         label="Model",
         options=[
@@ -115,6 +129,7 @@ with st.container(border=True):
             "cvssp/audioldm2-large",
             "cvssp/audioldm2-music",
         ],
+        key="model_repo",
     )
 
     devices = [
@@ -136,14 +151,17 @@ with st.container(border=True):
         options=devices,
         horizontal=True,
         help="Please check either device type is supported on your machine.",
+        key="device_chosen",
     )
 
     positive_prompt = st.text_area(
         label="Positive Prompt",
+        key="positive_prompt",
     )
 
     negative_prompt = st.text_area(
         label="Negative Prompt",
+        key="negative_prompt",
     )
 
     steps = st.number_input(
@@ -151,24 +169,28 @@ with st.container(border=True):
         format="%i",
         value=200,
         min_value=1,
+        key="steps",
     )
 
     guidance_scale = st.number_input(
         label="Guidance Scale",
         value=3.5,
         min_value=0.0,
+        key="guidance_scale",
     )
 
     seed = st.number_input(
         label="Seed",
         format="%i",
         value=0,
+        key="seed",
     )
 
     duration = st.number_input(
         label="Duration (seconds)",
         value=1.0,
         min_value=0.04,
+        key="duration",
     )
 
     amount = st.number_input(
@@ -176,6 +198,7 @@ with st.container(border=True):
         format="%i",
         value=1,
         min_value=1,
+        key="amount",
     )
 
     button_generate = st.empty()
@@ -306,3 +329,12 @@ if button_generate.button(
 
             index += 1
 
+makedirs(TEMP_DIR, exist_ok=True)
+
+with open(SESSION_STATE_PATH, "w") as file:
+    file.write(
+        json.dumps(
+            obj=dict(st.session_state),
+            indent=2,
+        )
+    )
