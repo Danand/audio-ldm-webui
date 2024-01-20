@@ -2,20 +2,22 @@
 
 Simple web UI for AudioLDM 2, built with [Streamlit](https://streamlit.io/).
 
+## Prerequisites
+
+- [Python](https://www.python.org/downloads)
+
 ## How to install
 
 ```bash
 git clone git@github.com:Danand/audio-ldm-webui.git
 cd audio-ldm-webui
-python3 -m venv .venv
-source .venv/bin/activate
-pip install --pre -r requirements.txt
+chmod +x webui.sh
 ```
 
 ## How to launch
 
 ```bash
-streamlit run webui.py
+./webui.sh
 ```
 
 ## Credits
