@@ -291,5 +291,10 @@ if button_generate.button(
 
                 st.audio(output_path)
 
+                st.json(
+                    body=output_audio_info.__dict__,
+                    expanded=False,
+                )
+
             index += 1
 
