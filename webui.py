@@ -183,6 +183,8 @@ container_output = st.empty()
 
 if button_generate.button(
     label="Generate",
+    type="primary",
+    use_container_width=True,
 ):
     with container_progress.container(border=True):
         st.subheader("Progress")
