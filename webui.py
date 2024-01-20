@@ -206,7 +206,7 @@ if button_generate.button(
     time_start = time.time()
 
     pipe_output: AudioPipelineOutput = pipe(
-        positive_prompt,
+        prompt=positive_prompt,
         negative_prompt=negative_prompt,
         num_inference_steps=cast(int, steps),
         guidance_scale=cast(float, guidance_scale),
@@ -236,7 +236,7 @@ if button_generate.button(
                     y=audio,
                     sr=SAMPLE_RATE_DEFAULT,
                     hop_length=512,
-                    )
+                )
 
                 tempo, _ = librosa.beat.beat_track(
                     onset_envelope=onset_envelope,
