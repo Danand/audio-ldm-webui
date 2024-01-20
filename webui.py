@@ -103,7 +103,10 @@ st.set_page_config(
 st.title(title)
 
 with st.container(border=True):
-    st.subheader("Settings")
+    st.subheader(
+        body="Settings",
+        divider="orange",
+    )
 
     model_repo = st.selectbox(
         label="Model",
@@ -228,7 +231,10 @@ if button_generate.button(
     audios: np.ndarray = pipe_output.audios
 
     with container_output.container(border=True):
-        st.subheader("Generated Audio")
+        st.subheader(
+            body="Generated Audio",
+            divider="orange"
+        )
 
         index = 0
 
