@@ -15,7 +15,7 @@ import json
 
 from typing import List, cast
 from os.path import join, realpath, exists
-from os import makedirs
+from os import makedirs, remove
 from platform import system
 from dataclasses import dataclass
 
@@ -109,6 +109,11 @@ with st.container(border=True):
         body="Settings",
         divider="orange",
     )
+
+    if exists(SESSION_STATE_PATH):
+        if st.button("Reset"):
+            remove(SESSION_STATE_PATH)
+            st.session_state.clear()
 
     if not st.session_state.get("is_loaded_session_state", False):
         if exists(SESSION_STATE_PATH):
