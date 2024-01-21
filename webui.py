@@ -154,55 +154,66 @@ with st.container(border=True):
         options=devices,
         horizontal=True,
         help="Please check either device type is supported on your machine.",
-        key="device_chosen",
+        index=devices.index(st.session_state.get("device_chosen", devices[0])),
     )
+
+    st.session_state["device_chosen"] = device_chosen
 
     positive_prompt = st.text_area(
         label="Positive Prompt",
-        key="positive_prompt",
+        value=st.session_state.get("positive_prompt", ""),
     )
+
+    st.session_state["positive_prompt"] = positive_prompt
 
     negative_prompt = st.text_area(
         label="Negative Prompt",
-        key="negative_prompt",
+        value=st.session_state.get("negative_prompt", ""),
     )
+
+    st.session_state["negative_prompt"] = negative_prompt
 
     steps = st.number_input(
         label="Steps",
         format="%i",
-        value=200,
+        value=st.session_state.get("steps", 200),
         min_value=1,
-        key="steps",
     )
+
+    st.session_state["steps"] = steps
 
     guidance_scale = st.number_input(
         label="Guidance Scale",
-        value=3.5,
+        value=st.session_state.get("guidance_scale", 3.5),
         min_value=0.0,
-        key="guidance_scale",
     )
+
+    st.session_state["guidance_scale"] = guidance_scale
 
     seed = st.number_input(
         label="Seed",
         format="%i",
-        value=0,
-        key="seed",
+        value=st.session_state.get("seed", 0),
     )
+
+    st.session_state["seed"] = seed
 
     duration = st.number_input(
         label="Duration (seconds)",
-        value=1.0,
+        value=st.session_state.get("duration", 1.0),
         min_value=0.04,
-        key="duration",
     )
+
+    st.session_state["duration"] = duration
 
     amount = st.number_input(
         label="Audio clips amount",
         format="%i",
-        value=1,
+        value=st.session_state.get("amount", 1),
         min_value=1,
-        key="amount",
     )
+
+    st.session_state["amount"] = amount
 
     button_generate = st.empty()
 
