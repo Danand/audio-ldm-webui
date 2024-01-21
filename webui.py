@@ -120,8 +120,6 @@ with st.container(border=True):
 
         st.session_state["is_loaded_session_state"] = True
 
-        st.session_state.clear()
-
     model_repo = st.selectbox(
         label="Model",
         options=[
