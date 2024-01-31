@@ -14,14 +14,12 @@ import hashlib
 import json
 
 from typing import List, TypeVar, cast
-from os.path import join, realpath, exists
-from os import makedirs, remove
+from os.path import join, realpath
+from os import makedirs
 from platform import system
 from dataclasses import dataclass
 
 SAMPLE_RATE_DEFAULT = 16000
-TEMP_DIR = "temp"
-SESSION_STATE_PATH = f"{TEMP_DIR}/session-state.json"
 
 @dataclass(frozen=True)
 class OutputAudioInfo:
@@ -114,21 +112,6 @@ with st.container(border=True):
         divider="orange",
     )
 
-    if exists(SESSION_STATE_PATH):
-        if st.button("Reset"):
-            remove(SESSION_STATE_PATH)
-            st.session_state.clear()
-
-    if not st.session_state.get("is_loaded_session_state", False):
-        if exists(SESSION_STATE_PATH):
-            with open(SESSION_STATE_PATH, "r") as file:
-                session_state_loaded = json.loads(file.read())
-
-                for key, value in dict(session_state_loaded).items():
-                    st.session_state[key] = value
-
-        st.session_state["is_loaded_session_state"] = True
-
     model_repo = st.selectbox(
         label="Model",
         options=[
@@ -146,66 +129,48 @@ with st.container(border=True):
         options=devices,
         horizontal=True,
         help="Please check either device type is supported on your machine.",
-        index=devices.index(st.session_state.get("device_chosen", devices[0])),
+        index=devices.index(devices[0]),
     )
-
-    st.session_state["device_chosen"] = device_chosen
 
     positive_prompt = st.text_area(
         label="Positive Prompt",
-        value=st.session_state.get("positive_prompt", ""),
     )
-
-    st.session_state["positive_prompt"] = positive_prompt
 
     negative_prompt = st.text_area(
         label="Negative Prompt",
-        value=st.session_state.get("negative_prompt", ""),
     )
-
-    st.session_state["negative_prompt"] = negative_prompt
 
     steps = st.number_input(
         label="Steps",
         format="%i",
-        value=st.session_state.get("steps", 200),
+        value=200,
         min_value=1,
     )
 
-    st.session_state["steps"] = steps
-
     guidance_scale = st.number_input(
         label="Guidance Scale",
-        value=st.session_state.get("guidance_scale", 3.5),
+        value=3.5,
         min_value=0.0,
     )
-
-    st.session_state["guidance_scale"] = guidance_scale
 
     seed = st.number_input(
         label="Seed",
         format="%i",
-        value=st.session_state.get("seed", 0),
+        value=0,
     )
-
-    st.session_state["seed"] = seed
 
     duration = st.number_input(
         label="Duration (seconds)",
-        value=st.session_state.get("duration", 1.0),
+        value=1.0,
         min_value=0.04,
     )
-
-    st.session_state["duration"] = duration
 
     amount = st.number_input(
         label="Audio clips amount",
         format="%i",
-        value=st.session_state.get("amount", 1),
+        value=1,
         min_value=1,
     )
-
-    st.session_state["amount"] = amount
 
     button_generate = st.empty()
 
@@ -334,13 +299,3 @@ if button_generate.button(
                 )
 
             index += 1
-
-makedirs(TEMP_DIR, exist_ok=True)
-
-with open(SESSION_STATE_PATH, "w") as file:
-    file.write(
-        json.dumps(
-            obj=dict(st.session_state),
-            indent=2,
-        )
-    )
