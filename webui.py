@@ -13,7 +13,7 @@ import time
 import hashlib
 import json
 
-from typing import List, cast
+from typing import List, TypeVar, cast
 from os.path import join, realpath, exists
 from os import makedirs, remove
 from platform import system
@@ -36,6 +36,12 @@ class OutputAudioInfo:
     tempo: float
     note: str
 
+TListItem = TypeVar("TListItem")
+
+def move_to_top(items: List[TListItem], item: TListItem) -> None:
+    items.remove(item)
+    items.insert(0, item)
+
 def get_available_devices() -> List[str]:
     devices = [
         "cpu",
@@ -44,12 +50,10 @@ def get_available_devices() -> List[str]:
     ]
 
     if torch.cuda.is_available():
-        devices.remove("cuda")
-        devices.insert(0, "cuda")
+        move_to_top(devices, "cuda")
 
     if torch.backends.mps.is_available() and system() == "Darwin":
-        devices.remove("mps")
-        devices.insert(0, "mps")
+        move_to_top(devices, "mps")
 
     return devices
 
